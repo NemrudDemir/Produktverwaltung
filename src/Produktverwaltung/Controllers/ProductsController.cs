@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Produktverwaltung.DataAccess.Entities;
 using Produktverwaltung.Repository.Interfaces;
 using Produktverwaltung.Repository.Pagination;
@@ -13,12 +12,10 @@ namespace Produktverwaltung.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository _repository;
-        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
+        public ProductsController(IProductRepository repository)
         {
             _repository = repository;
-            _logger = logger;
         }
 
         [HttpGet]

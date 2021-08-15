@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Produktverwaltung.DataAccess.Entities;
 using Produktverwaltung.Repository.Interfaces;
 using Produktverwaltung.Repository.Pagination;
@@ -13,12 +12,10 @@ namespace Produktverwaltung.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryRepository _repo;
-        private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(ICategoryRepository repository, ILogger<CategoriesController> logger)
+        public CategoriesController(ICategoryRepository repository)
         {
             _repo = repository;
-            _logger = logger;
         }
 
         [HttpGet]
