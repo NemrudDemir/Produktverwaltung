@@ -5,7 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Produktverwaltung.Database;
+using Produktverwaltung.DataAccess;
+using Produktverwaltung.Repository;
+using Produktverwaltung.Repository.Interfaces;
 using Produktverwaltung.Settings;
 
 namespace Produktverwaltung
@@ -24,11 +26,14 @@ namespace Produktverwaltung
         {
             services.Configure<DbSettings>(Configuration.GetSection(nameof(DbSettings)));
 
-            services.AddDbContextPool<ProductContext>((services, options) =>
+            services.AddDbContextPool<ProduktverwaltungContext>((services, options) =>
             {
                 var dbSettings = services.GetRequiredService<IOptions<DbSettings>>();
                 options.UseMySQL(dbSettings.Value.MySqlConnectionString);
             });
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+
             services.AddControllers();
 
             services.AddSwaggerGen();

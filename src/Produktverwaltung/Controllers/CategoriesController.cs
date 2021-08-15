@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Produktverwaltung.Database;
-using Produktverwaltung.Database.Models;
-using Produktverwaltung.Extensions;
-using Produktverwaltung.Pagination;
+using Produktverwaltung.DataAccess.Entities;
+using Produktverwaltung.Repository.Interfaces;
+using Produktverwaltung.Repository.Pagination;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,12 +12,12 @@ namespace Produktverwaltung.Controllers
     [Route("[controller]")]
     public class CategoriesController : ControllerBase
     {
-        private readonly ProductContext _context;
+        private readonly ICategoryRepository _repo;
         private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(ProductContext context, ILogger<CategoriesController> logger)
+        public CategoriesController(ICategoryRepository repository, ILogger<CategoriesController> logger)
         {
-            _context = context;
+            _repo = repository;
             _logger = logger;
         }
 
@@ -26,7 +25,7 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 200, Type = typeof(IQueryable<Category>))]
         public IActionResult Get([FromQuery] PaginationParameter paginationParameter)
         {
-            var categories = _context.Categories.Pagination(paginationParameter);
+            var categories = _repo.GetCategories(paginationParameter);
             return Ok(categories);
         }
 
@@ -35,7 +34,7 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 404)]
         public async Task<IActionResult> GetOne(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _repo.GetCategory(id);
             if (category == null)
                 return NotFound();
 
@@ -48,13 +47,12 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 409)]
         public async Task<IActionResult> Post([FromBody] Category category)
         {
-            if (await _context.Categories.FindAsync(category.Id) != null)
+            if (await _repo.GetCategory(category.Id) != null)
                 return Conflict();
 
-            var entry = await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
-
-            return Ok(entry.Entity);
+            var entity = await _repo.PostCategory(category);
+            
+            return Ok(entity);
         }
 
         [HttpPatch]
@@ -63,13 +61,12 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 404)]
         public async Task<IActionResult> Patch([FromBody] Category category)
         {
-            if (await _context.Categories.FindAsync(category.Id) == null)
+            if (await _repo.GetCategory(category.Id) == null)
                 return NotFound();
 
-            var entry = _context.Categories.Update(category);
-            await _context.SaveChangesAsync();
-
-            return Ok(entry.Entity);
+            var entity = await _repo.PatchCategory(category);
+            
+            return Ok(entity);
         }
 
         [HttpDelete]
@@ -77,13 +74,12 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 404)]
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _repo.GetCategory(id);
             if (category == null)
                 return NotFound();
 
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-
+            await _repo.DeleteCategory(category);
+            
             return NoContent();
         }
     }

@@ -1,17 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Produktverwaltung.Database.Models;
-using Produktverwaltung.Settings;
+using Produktverwaltung.DataAccess.Entities;
 
-namespace Produktverwaltung.Database
+namespace Produktverwaltung.DataAccess
 {
-    public class ProductContext : DbContext
+    public class ProduktverwaltungContext : DbContext
     {
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<Product> Products { get; set; }
 
-        public ProductContext(DbContextOptions<ProductContext> options) : base(options)
+        public ProduktverwaltungContext(DbContextOptions<ProduktverwaltungContext> options) : base(options)
         {
         }
 

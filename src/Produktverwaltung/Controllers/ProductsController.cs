@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Produktverwaltung.Database;
-using Produktverwaltung.Database.Models;
-using Produktverwaltung.Extensions;
-using Produktverwaltung.Pagination;
+using Produktverwaltung.DataAccess.Entities;
+using Produktverwaltung.Repository.Interfaces;
+using Produktverwaltung.Repository.Pagination;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,12 +12,12 @@ namespace Produktverwaltung.Controllers
     [Route("[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly ProductContext _context;
+        private readonly IProductRepository _repository;
         private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(ProductContext context, ILogger<ProductsController> logger)
+        public ProductsController(IProductRepository repository, ILogger<ProductsController> logger)
         {
-            _context = context;
+            _repository = repository;
             _logger = logger;
         }
 
@@ -26,7 +25,7 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 200, Type = typeof(IQueryable<Product>))]
         public IActionResult Get([FromQuery]PaginationParameter paginationParameter)
         {
-            var products = _context.Products.Pagination(paginationParameter);
+            var products = _repository.GetProducts(paginationParameter);
             return Ok(products);
         }
 
@@ -35,7 +34,7 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 404)]
         public async Task<IActionResult> GetOne(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _repository.GetProduct(id);
             if (product == null)
                 return NotFound();
 
@@ -48,13 +47,11 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 409)]
         public async Task<IActionResult> Post([FromBody]Product product)
         {
-            if (await _context.Products.FindAsync(product.Id) != null)
+            if (await _repository.GetProduct(product.Id) != null)
                 return Conflict();
 
-            var entry = await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
-
-            return Ok(entry.Entity);
+            var entity = await _repository.PostProduct(product);
+            return Ok(entity);
         }
 
         [HttpPatch]
@@ -63,13 +60,11 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 404)]
         public async Task<IActionResult> Patch([FromBody]Product product)
         {
-            if (await _context.Products.FindAsync(product.Id) == null)
+            if (await _repository.GetProduct(product.Id) == null)
                 return NotFound();
 
-            var entry = _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-
-            return Ok(entry.Entity);
+            var entity = await _repository.PatchProduct(product);
+            return Ok(entity);
         }
 
         [HttpDelete]
@@ -77,13 +72,11 @@ namespace Produktverwaltung.Controllers
         [ProducesResponseType(statusCode: 404)]
         public async Task<IActionResult> Delete(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _repository.GetProduct(id);
             if (product == null)
                 return NotFound();
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
+            await _repository.DeleteProduct(product);
             return NoContent();
         }
     }

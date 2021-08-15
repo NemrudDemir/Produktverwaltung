@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Produktverwaltung.Database.Models
+namespace Produktverwaltung.DataAccess.Entities
 {
     public class Category
     {

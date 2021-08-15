@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Produktverwaltung.Pagination;
+using Produktverwaltung.Repository.Pagination;
 using System.Linq;
 
 namespace Produktverwaltung.Extensions
